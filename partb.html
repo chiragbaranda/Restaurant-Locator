@@ -1,0 +1,294 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        Finding Restuarant
+    </title>
+
+    <style>
+        /* Center the loader */
+        #loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 1;
+            width: 150px;
+            height: 150px;
+            margin: -85px 0 0 -120px;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 225px;
+            height: 225px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Add animation to "page content" */
+        .animate-bottom {
+            position: relative;
+            -webkit-animation-name: animatebottom;
+            -webkit-animation-duration: 1s;
+            animation-name: animatebottom;
+            animation-duration: 1s
+        }
+
+        @-webkit-keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0
+            }
+
+            to {
+                bottom: 0px;
+                opacity: 1
+            }
+        }
+
+        @keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0
+            }
+
+            to {
+                bottom: 0;
+                opacity: 1
+            }
+        }
+
+        #myDiv {
+            /*            display: none;*/
+            text-align: center;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/modernizr/modernizr-1.7-development-only.js"></script>
+</head>
+
+<body>
+    <div class="Container">
+
+        <div class="card">
+            <div class="card-header">
+                <h1>Random restaurant</h1>
+            </div>
+            <div class="card-body">
+                <p id="dynamicDiv">
+                    Finding your location
+
+                </p>
+                <div id="listOfrestaurant">
+                    <ul id="list-unstyled">
+
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <div id="loader"></div>
+        <!--        <input type="button" id="search" value="search rest" />-->
+
+
+    </div>
+</body>
+<!--<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=AkgH3ebYWOUmhwfx4kXc_Yn84Wz6g-resdxO_p0XmXY1f0Iz_m-jSs5wcHDFRUrA&callback=loadMapScenario' async defer></script>-->
+
+<script>
+    $(document).ready(function() {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
+            console.log(latitude + " and  " + longitude);
+            //$('#whereami').append(latitude + ':' + longitude);
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("dynamicDiv").innerHTML = "";
+            $("#dynamicDiv").append("Finding Restaurants near you");
+
+
+            document.getElementById("loader").style.display = "block";
+            setTimeout(showresult, 10000);
+
+        });
+    });
+
+    function showresult() {
+        document.getElementById("loader").style.display = "none";
+        findRestaurant();
+        document.getElementById("dynamicDiv").innerHTML = "";
+        $("#dynamicDiv").append("Found Restaurants near you");
+    };
+
+
+    function findRestaurant() {
+
+        $.get('https://csunix.mohawkcollege.ca/tooltime/10133/api/api.php', {
+                lat: latitude,
+                long: longitude
+            },
+
+            function(results) {
+
+
+
+
+
+                for (var i = 0; i < 10; i++) {
+                    console.log(results.businesses[i].name);
+                    //console.log(results.businesses[0].image_url);
+                    console.log(results.businesses[i].categories[0].alias);
+                    console.log(results.businesses[i].location);
+                    console.log(results.businesses[i].display_phone);
+
+                    var contact_details = "<em>" + results.businesses[i].location.address1 + "</em> <br>" + results.businesses[i].display_phone;
+
+                    var ul = document.getElementById("list-unstyled");
+                    var li = document.createElement("li");
+                    var img = document.createElement("img");
+                    var div = document.createElement("div");
+                    var p = document.createElement("p");
+                    var h5 = document.createElement("h5");
+
+                    li.setAttribute('class', "media my-4");
+                    li.setAttribute('id', "media");
+                    //li.appendChild(document.createTextNode(results.businesses[0].name));
+
+                    img.setAttribute('class', "mr-3");
+                    img.setAttribute('height', "100px");
+                    img.setAttribute('width', "100px");
+                    img.setAttribute('src', results.businesses[i].image_url);
+
+                    div.setAttribute('class', "mt-0 mb-1");
+                    div.setAttribute('id', "nameOfRestaurant");
+                    div.insertAdjacentHTML('beforeend', "<b>" + results.businesses[i].name + "</b>");
+                    p.insertAdjacentHTML('beforeend', results.businesses[i].categories[0].alias + "<br>");
+                    p.insertAdjacentHTML('beforeend', contact_details);
+
+                    //p.appendChild(document.createTextNode("<b> " +details + "</b>"));
+
+                    div.appendChild(h5);
+                    div.appendChild(p);
+                    li.appendChild(img);
+                    li.appendChild(div);
+                    ul.appendChild(li);
+                }
+
+
+
+
+                //title, image category phone
+
+
+
+
+
+            }, 'json');
+
+
+
+
+        return false;
+    };
+
+
+    //    $("#search").click(function() {
+    //
+    //        $.get('https://csunix.mohawkcollege.ca/tooltime/10133/api/api.php', {
+    //                lat: latitude,
+    //                long: longitude
+    //            },
+    //
+    //            function(results) {
+    //                document.getElementById("dynamicDiv").innerHTML = "";
+    //                $("#dynamicDiv").append("Found Restaurants near you");
+    //
+    //
+    //
+    //                for (var i = 0; i < 10; i++) {
+    //                    console.log(results.businesses[i].name);
+    //                    //console.log(results.businesses[0].image_url);
+    //                    console.log(results.businesses[i].categories[0].alias);
+    //                    console.log(results.businesses[i].location);
+    //                    console.log(results.businesses[i].display_phone);
+    //
+    //                    var contact_details = "<em>" + results.businesses[i].location.address1 + "</em> <br>" + results.businesses[i].display_phone;
+    //
+    //                    var ul = document.getElementById("list-unstyled");
+    //                    var li = document.createElement("li");
+    //                    var img = document.createElement("img");
+    //                    var div = document.createElement("div");
+    //                    var p = document.createElement("p");
+    //                    var h5 = document.createElement("h5");
+    //
+    //                    li.setAttribute('class', "media my-4");
+    //                    li.setAttribute('id', "media");
+    //                    //li.appendChild(document.createTextNode(results.businesses[0].name));
+    //
+    //                    img.setAttribute('class', "mr-3");
+    //                    img.setAttribute('height', "100px");
+    //                    img.setAttribute('width', "100px");
+    //                    img.setAttribute('src', results.businesses[i].image_url);
+    //
+    //                    div.setAttribute('class', "mt-0 mb-1");
+    //                    div.setAttribute('id', "nameOfRestaurant");
+    //                    div.insertAdjacentHTML('beforeend', "<b>" + results.businesses[i].name + "</b>");
+    //                    p.insertAdjacentHTML('beforeend', results.businesses[i].categories[0].alias + "<br>");
+    //                    p.insertAdjacentHTML('beforeend', contact_details);
+    //
+    //                    //p.appendChild(document.createTextNode("<b> " +details + "</b>"));
+    //
+    //                    div.appendChild(h5);
+    //                    div.appendChild(p);
+    //                    li.appendChild(img);
+    //                    li.appendChild(div);
+    //                    ul.appendChild(li);
+    //                }
+    //
+    //
+    //
+    //
+    //                //title, image category phone
+    //
+    //
+    //
+    //
+    //
+    //            }, 'json');
+    //
+    //
+    //
+    //
+    //        return false;
+    //    });
+
+</script>
+
+</html>
